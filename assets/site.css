@@ -177,7 +177,7 @@ h2{font-size:clamp(30px,3.8vw,46px);line-height:1.1;letter-spacing:-.03em;font-w
 .haber{background:var(--kart);border-radius:var(--r);overflow:hidden;box-shadow:var(--golge);display:flex;flex-direction:column;transition:transform .3s}
 .haber:hover{transform:translateY(-5px)}
 .haber .gorsel{height:190px;background:linear-gradient(135deg,#1A1D24,#2A2017);position:relative;overflow:hidden}
-.haber .gorsel img{position:absolute;width:62%;left:19%;top:22px;border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.4);transition:transform .6s}
+.haber .gorsel img{position:absolute;width:62%;height:auto;left:19%;top:22px;border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.4);transition:transform .6s}
 .haber:hover .gorsel img{transform:translateY(-10px)}
 .haber .gorsel .em{position:absolute;inset:0;display:grid;place-items:center;font-size:64px}
 .haber .ic{padding:22px 24px 26px;display:flex;flex-direction:column;gap:8px;flex:1}
