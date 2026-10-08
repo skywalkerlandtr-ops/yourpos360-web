@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sipariş ver · YourPOS 360</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#E8590C">
+<link rel="icon" href="/assets/img/ikon.svg" type="image/svg+xml">
+<style>
+:root{--ac:#E8590C;--ac2:#FF8A3D;--bg:#FFFAF6;--kart:#fff;--ink:#14161A;--sub:#5B606B;--hat:#ECE3DC;--tg:#229ED9;--golge:0 1px 2px rgba(20,22,26,.05),0 12px 32px rgba(20,22,26,.08);color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0E1014;--kart:#171A21;--ink:#F3F4F6;--sub:#A3A9B5;--hat:#262A33;--golge:none;color-scheme:dark}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Color Emoji",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:28px 16px calc(28px + env(safe-area-inset-bottom,0px));line-height:1.5}
+.kart{width:100%;max-width:440px;background:var(--kart);border-radius:24px;box-shadow:var(--golge);padding:26px 20px;text-align:center}
+.logo{width:76px;height:76px;border-radius:20px;margin:0 auto 14px;display:grid;place-items:center;font-size:30px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:cover}
+h1{font-size:24px;line-height:1.25;margin-bottom:6px}
+.alt{color:var(--sub);font-size:15px;margin-bottom:20px}
+.sec{display:flex;flex-direction:column;gap:12px;text-align:left}
+.sec a{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;text-decoration:none;color:inherit;border:2px solid var(--hat);transition:border-color .15s,transform .15s}
+.sec a:hover{transform:translateY(-1px)}
+.sec a.tg{border-color:var(--tg)}
+.sec a.web{border-color:var(--ac)}
+.sec .ik{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;flex:none;color:#fff}
+.sec .tg .ik{background:var(--tg)}
+.sec .web .ik{background:var(--ac)}
+.sec b{display:block;font-size:17px}
+.sec span.s{color:var(--sub);font-size:14px}
+.sec .ok{margin-left:auto;color:var(--sub);font-size:22px}
+.not{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(232,89,12,.1);color:var(--ink);font-size:14px;text-align:left}
+.hatirla{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:16px;color:var(--sub);font-size:14px}
+.hatirla input{width:20px;height:20px;accent-color:var(--ac)}
+.spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--ac);border-right-color:transparent;animation:d .8s linear infinite;margin:18px auto}
+@keyframes d{to{transform:rotate(360deg)}}
+.marka{margin-top:22px;color:var(--sub);font-size:13px;text-align:center}
+.marka a{color:var(--ac);font-weight:700;text-decoration:none}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<main class="kart" id="q">
+  <div class="logo" id="logo" aria-hidden="true">🍽️</div>
+  <h1 id="ad">Sipariş sayfası</h1>
+  <p class="alt" id="altyazi">Açılıyor…</p>
+  <div class="spin" id="yuk" role="status" aria-label="Yükleniyor"></div>
+  <div class="sec" id="sec"></div>
+  <label class="hatirla" id="hatirlaK" hidden><input type="checkbox" id="hatirla"> Seçimimi bu telefonda hatırla</label>
+  <p class="not" id="not" hidden></p>
+</main>
+<main class="kart" id="yok" hidden>
+  <div class="logo" aria-hidden="true">?</div>
+  <h1>Sayfa bulunamadı</h1>
+  <p class="alt">Aradığınız sayfa taşınmış ya da hiç olmamış olabilir.</p>
+  <div class="sec"><a class="web" href="/"><span class="ik">🏠</span><span><b>YourPOS 360 ana sayfa</b><span class="s">yourpos360.com</span></span><span class="ok">›</span></a></div>
+</main>
+<p class="marka">Sipariş sistemi: <a href="/">YourPOS 360</a> · komisyonsuz</p>
+<script>
+(function(){
+  var APP = 'https://skywalkerlandtr-ops.github.io/yourpos360-app/', API = 'https://yourpos360.onrender.com/exec';
+  // Adres biçimleri: /q/?b=<IsletmeID> (QR afişleri) · /q/?<IsletmeID> · /q/<IsletmeID>
+  var yol = location.pathname.replace(/\/+$/, ''), pm = /^\/q\/([A-Za-z0-9_-]{1,64})$/.exec(yol), sq = new URLSearchParams(location.search);
+  var b = pm ? pm[1] : (sq.get('b') || (/^\?[A-Za-z0-9_-]{1,64}$/.test(location.search) ? location.search.slice(1) : ''));
+  var $ = function(s){ return document.querySelector(s); };
+  var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return '&#' + c.charCodeAt(0) + ';'; }); };
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(b)) { $('#q').hidden = true; $('#yok').hidden = false; return; }
+  var demo = b === 'ornek';
+  var webUrl = APP + 'index.html?' + (demo ? 'demo=1' : 'b=' + encodeURIComponent(b) + '&web=1');
+  var KEY = 'yp360-q-' + b, LS = { get:function(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set:function(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
+  function goster(r){
+    var ad = r.ad || 'Sipariş', tgUrl = r.bot ? 'https://t.me/' + encodeURIComponent(r.bot) + '?start=qr' : '';
+    document.title = ad + ' · Sipariş ver';
+    $('#logo').innerHTML = r.logoResim ? '<img src="' + esc(r.logoResim) + '" alt="">' : esc(r.logo || (ad.trim().split(/\s+/).slice(0, 2).map(function(w){ return w.charAt(0); }).join('').toLocaleUpperCase('tr-TR') || '🍽️'));
+    $('#ad').textContent = ad;
+    var h = '';
+    if (tgUrl && !r.telegramsiz) h += '<a class="tg" href="' + esc(tgUrl) + '" data-sec="tg"><span class="ik">✈️</span><span><b>Telegram\'dan sipariş ver</b><span class="s">Telegram uygulaması açılır</span></span><span class="ok">›</span></a>';
+    if (r.web !== false) h += '<a class="web" href="' + esc(webUrl) + '" data-sec="web"><span class="ik">🌐</span><span><b>Tarayıcıdan sipariş ver</b><span class="s">Uygulama gerekmez, bu telefonda açılır</span></span><span class="ok">›</span></a>';
+    $('#sec').innerHTML = h || '<p class="alt">Bu işletme şu an sipariş almıyor.</p>';
+    $('#yuk').hidden = true;
+    $('#altyazi').textContent = r.acik === false ? 'Şu an kapalı · menüye göz atabilirsiniz' : 'Nasıl sipariş vermek istersiniz?';
+    if (r.telegramsiz && r.web !== false) {
+      $('#not').hidden = false;
+      $('#not').textContent = 'Telegram şu an kullanılamıyor; siparişinizi tarayıcıdan verebilirsiniz. Sipariş sayfası açılıyor…';
+      setTimeout(function(){ location.replace(webUrl); }, 1800);
+      return;
+    }
+    $('#hatirlaK').hidden = !(tgUrl && r.web !== false);
+    var son = LS.get(KEY);
+    if (son && /^(tg|web)$/.test(son) && new URLSearchParams(location.search).get('sor') !== '1') {
+      var a = document.querySelector('[data-sec="' + son + '"]');
+      if (a) { $('#hatirla').checked = true; location.replace(a.href); }
+    }
+  }
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('[data-sec]');
+    if (a && $('#hatirla').checked) LS.set(KEY, a.getAttribute('data-sec'));
+    if (a && !$('#hatirla').checked) LS.set(KEY, '');
+  });
+  if (demo) { goster({ ad:'Örnek Dönerci', bot:'yourpos360_bot', web:true, acik:true }); return; }
+  // Sunucu uykudaysa ilk yanıt gecikebilir: 6 sn sonra tarayıcı seçeneği yine de gösterilir
+  var bitti = false;
+  var t = setTimeout(function(){ if (!bitti) { $('#sec').innerHTML = '<a class="web" href="' + esc(webUrl) + '" data-sec="web"><span class="ik">🌐</span><span><b>Tarayıcıdan sipariş ver</b><span class="s">Uygulama gerekmez</span></span><span class="ok">›</span></a>'; $('#altyazi').textContent = 'Bağlanıyor… Beklemeden tarayıcıdan sipariş verebilirsiniz.'; } }, 6000);
+  fetch(API + '?api=1', { method:'POST', body:JSON.stringify({ act:'webIsletme', b:b }) }).then(function(r){ return r.json(); }).then(function(r){
+    bitti = true; clearTimeout(t);
+    if (!r || !r.ok) { $('#yuk').hidden = true; $('#ad').textContent = 'İşletme bulunamadı'; $('#altyazi').textContent = 'QR kodu eski ya da işletme kaldırılmış olabilir.'; $('#sec').innerHTML = ''; return; }
+    goster(r);
+  }).catch(function(){
+    bitti = true; clearTimeout(t);
+    $('#yuk').hidden = true;
+    $('#altyazi').textContent = 'Sunucuya ulaşılamadı. Tarayıcıdan sipariş sayfasını açmayı deneyin.';
+    $('#sec').innerHTML = '<a class="web" href="' + esc(webUrl) + '" data-sec="web"><span class="ik">🌐</span><span><b>Tarayıcıdan sipariş ver</b><span class="s">Sipariş sayfasını aç</span></span><span class="ok">›</span></a>';
+  });
+})();
+</script>
+</body>
+</html>
