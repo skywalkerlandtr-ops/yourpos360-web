@@ -311,3 +311,26 @@ h2{font-size:clamp(30px,3.8vw,46px);line-height:1.1;letter-spacing:-.03em;font-w
   *,*::before,*::after{animation:none!important;transition:none!important}
   .gor{opacity:1;transform:none}
 }
+/* 1.18 · üye işletme girişi */
+.acik-zemin .btn-cam{background:var(--ac-soft);color:var(--ac);box-shadow:none}
+.ust .btn-giris{margin-left:12px}
+.ust .btn-giris + .btn{margin-left:8px}
+@media (max-width:1240px){ .ust .btn-giris{display:none} }
+.uye-giris{margin-top:18px;font-size:15px;color:rgba(255,255,255,.72)}
+.uye-giris a{color:#fff;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:1px}
+.uye-giris a:hover{border-bottom-color:#fff}
+.acik-zemin ~ main .uye-giris,.r-kahraman .uye-giris{color:var(--sub)}
+.logo{white-space:nowrap}
+@media (min-width:861px){ .menu a{white-space:nowrap} }
+@media (min-width:1241px){ .menu li:last-child{display:none} }
+@media (min-width:861px) and (max-width:1100px){ .menu a{padding:9px 9px;font-size:14px} .ust .kap{gap:10px} }
+@media (min-width:1241px){ .menu a{padding:9px 11px} }
+@media (min-width:861px) and (max-width:1100px){
+  .menu{position:fixed;top:68px;left:12px;right:12px;flex-direction:column;background:rgba(14,16,20,.97);border-radius:20px;padding:10px;box-shadow:0 20px 50px rgba(0,0,0,.4);display:none}
+  .acik-zemin .menu{background:#fff;box-shadow:0 20px 50px rgba(60,40,20,.2)}
+  .menu-acik .menu{display:flex}
+  .menu a{padding:13px 16px;font-size:17px}
+  .hamb{display:block}
+  .ust .btn-giris{display:none}
+}
+@media (min-width:861px) and (max-width:1100px){ .ust .btn-giris + .btn-ac{margin-left:auto} .ust .hamb{margin-left:10px} }
