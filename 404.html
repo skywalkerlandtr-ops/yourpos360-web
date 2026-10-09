@@ -58,7 +58,7 @@ h1{font-size:24px;line-height:1.25;margin-bottom:6px}
 <p class="marka">Sipariş sistemi: <a href="/">YourPOS 360</a> · komisyonsuz</p>
 <script>
 (function(){
-  var APP = 'https://skywalkerlandtr-ops.github.io/yourpos360-app/', API = 'https://yourpos360.onrender.com/exec';
+  var APP = 'https://skywalkerlandtr-ops.github.io/yourpos360-app/', API = 'https://api.yourpos360.com/exec';
   // Adres biçimleri: /q/?b=<IsletmeID> (QR afişleri) · /q/?<IsletmeID> · /q/<IsletmeID>
   var yol = location.pathname.replace(/\/+$/, ''), pm = /^\/q\/([A-Za-z0-9_-]{1,64})$/.exec(yol), sq = new URLSearchParams(location.search);
   var b = pm ? pm[1] : (sq.get('b') || (/^\?[A-Za-z0-9_-]{1,64}$/.test(location.search) ? location.search.slice(1) : ''));
