@@ -46,7 +46,7 @@ h1{font-size:24px;line-height:1.25;margin-bottom:6px}
   <p class="alt" id="altyazi">Açılıyor…</p>
   <div class="spin" id="yuk" role="status" aria-label="Yükleniyor"></div>
   <div class="sec" id="sec"></div>
-  <label class="hatirla" id="hatirlaK" hidden><input type="checkbox" id="hatirla"> Seçimimi bu telefonda hatırla</label>
+  <label class="hatirla" id="hatirlaK" hidden><input type="checkbox" id="hatirla"> <span id="hatirlaY">Seçimimi bu telefonda hatırla</span></label>
   <p class="not" id="not" hidden></p>
 </main>
 <main class="kart" id="yok" hidden>
@@ -59,58 +59,72 @@ h1{font-size:24px;line-height:1.25;margin-bottom:6px}
 <script>
 (function(){
   var APP = 'https://skywalkerlandtr-ops.github.io/yourpos360-app/', API = 'https://api.yourpos360.com/exec';
+  // 1.30 · QR doğrudan sipariş sayfasını (menüyü) açar; seçim ekranı yalnız ?sor=1 ile ya da web siparişi kapalıysa görünür.
+  // Daha önce «Telegram'dan sipariş ver» seçip «hatırla» diyen müşteri Telegram'a gider. Sayfa 9 dilde.
   // Adres biçimleri: /q/?b=<IsletmeID> (QR afişleri) · /q/?<IsletmeID> · /q/<IsletmeID>
   var yol = location.pathname.replace(/\/+$/, ''), pm = /^\/q\/([A-Za-z0-9_-]{1,64})$/.exec(yol), sq = new URLSearchParams(location.search);
   var b = pm ? pm[1] : (sq.get('b') || (/^\?[A-Za-z0-9_-]{1,64}$/.test(location.search) ? location.search.slice(1) : ''));
   var $ = function(s){ return document.querySelector(s); };
   var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return '&#' + c.charCodeAt(0) + ';'; }); };
+  var DIL = (function(){ var q = sq.get('dil'), l = ['tr','en','ru','de','ar','es','th','vi','pt'], d;
+    try { d = localStorage.getItem('yourpos360-dil'); } catch(e){}
+    if (l.indexOf(q) >= 0) return q; if (l.indexOf(d) >= 0) return d;
+    var n = String(navigator.language || '').toLowerCase().split(/[-_]/)[0]; return l.indexOf(n) >= 0 ? n : 'tr'; })();
+  var M = {
+    acil:['Açılıyor…','Opening…','Открывается…','Wird geöffnet…','جارٍ الفتح…','Abriendo…','กำลังเปิด…','Đang mở…','Abrindo…'],
+    yok:['İşletme bulunamadı','Business not found','Заведение не найдено','Geschäft nicht gefunden','لم يتم العثور على المتجر','Negocio no encontrado','ไม่พบร้านค้า','Không tìm thấy cửa hàng','Estabelecimento não encontrado'],
+    eski:['QR kodu eski ya da işletme kaldırılmış olabilir.','The QR code may be outdated or the business may have been removed.','QR-код устарел или заведение удалено.','Der QR-Code ist veraltet oder das Geschäft wurde entfernt.','قد يكون رمز QR قديمًا أو تمت إزالة المتجر.','El código QR puede estar desactualizado o el negocio ya no existe.','คิวอาร์โค้ดอาจเก่าหรือร้านค้าถูกนำออกแล้ว','Mã QR có thể đã cũ hoặc cửa hàng đã bị gỡ.','O QR code pode estar desatualizado ou o estabelecimento foi removido.'],
+    nasil:['Nasıl sipariş vermek istersiniz?','How would you like to order?','Как вы хотите сделать заказ?','Wie möchten Sie bestellen?','كيف تريد أن تطلب؟','¿Cómo quieres pedir?','คุณต้องการสั่งซื้อแบบใด','Bạn muốn đặt hàng bằng cách nào?','Como você quer fazer o pedido?'],
+    kapali:['Şu an kapalı · menüye göz atabilirsiniz','Closed now · you can browse the menu','Сейчас закрыто · можно посмотреть меню','Gerade geschlossen · Sie können das Menü ansehen','مغلق الآن · يمكنك تصفح القائمة','Cerrado ahora · puedes ver el menú','ปิดอยู่ตอนนี้ · ดูเมนูได้','Hiện đang đóng · bạn có thể xem thực đơn','Fechado agora · você pode ver o cardápio'],
+    tg:["Telegram'dan sipariş ver",'Order on Telegram','Заказать в Telegram','Über Telegram bestellen','اطلب عبر Telegram','Pedir por Telegram','สั่งซื้อผ่าน Telegram','Đặt hàng qua Telegram','Pedir pelo Telegram'],
+    tgS:['Telegram uygulaması açılır','Opens the Telegram app','Откроется приложение Telegram','Die Telegram-App wird geöffnet','سيفتح تطبيق Telegram','Se abre la app de Telegram','จะเปิดแอป Telegram','Ứng dụng Telegram sẽ mở','Abre o app do Telegram'],
+    web:['Tarayıcıdan sipariş ver','Order in the browser','Заказать в браузере','Im Browser bestellen','اطلب من المتصفح','Pedir en el navegador','สั่งซื้อในเบราว์เซอร์','Đặt hàng trên trình duyệt','Pedir no navegador'],
+    webS:['Uygulama gerekmez, bu telefonda açılır','No app needed, opens on this phone','Приложение не нужно, откроется на этом телефоне','Keine App nötig, öffnet sich auf diesem Telefon','لا حاجة لتطبيق، يفتح على هذا الهاتف','No necesitas app, se abre en este teléfono','ไม่ต้องใช้แอป เปิดบนโทรศัพท์เครื่องนี้','Không cần ứng dụng, mở ngay trên điện thoại này','Não precisa de app, abre neste telefone'],
+    almiyor:['Bu işletme şu an sipariş almıyor.','This business is not taking orders right now.','Сейчас заведение не принимает заказы.','Dieses Geschäft nimmt gerade keine Bestellungen an.','لا يستقبل هذا المتجر طلبات حاليًا.','Este negocio no acepta pedidos ahora.','ร้านนี้ยังไม่รับคำสั่งซื้อในขณะนี้','Cửa hàng này hiện không nhận đơn.','Este estabelecimento não está recebendo pedidos agora.'],
+    hatirla:['Seçimimi bu telefonda hatırla','Remember my choice on this phone','Запомнить выбор на этом телефоне','Meine Auswahl auf diesem Telefon merken','تذكّر اختياري على هذا الهاتف','Recordar mi elección en este teléfono','จำตัวเลือกของฉันในโทรศัพท์เครื่องนี้','Ghi nhớ lựa chọn trên điện thoại này','Lembrar minha escolha neste telefone']
+  };
+  var t = function(k){ var i = ['tr','en','ru','de','ar','es','th','vi','pt'].indexOf(DIL); return (M[k] && M[k][i]) || M[k][0]; };
+  document.documentElement.lang = DIL; if (DIL === 'ar') document.documentElement.dir = 'rtl';
+  $('#altyazi').textContent = t('acil'); $('#hatirlaY').textContent = t('hatirla');
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(b)) { $('#q').hidden = true; $('#yok').hidden = false; return; }
-  var demo = b === 'ornek';
-  var webUrl = APP + 'index.html?' + (demo ? 'demo=1' : 'b=' + encodeURIComponent(b) + '&web=1');
+  var demo = b === 'ornek', sor = sq.get('sor') === '1';
+  var webUrl = APP + 'index.html?' + (demo ? 'demo=1' : 'b=' + encodeURIComponent(b) + '&web=1') + (sq.get('dil') ? '&dil=' + DIL : '');
   var KEY = 'yp360-q-' + b, LS = { get:function(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set:function(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
-  function goster(r){
-    var ad = r.ad || 'Sipariş', tgUrl = r.bot ? 'https://t.me/' + encodeURIComponent(r.bot) + '?start=qr' : '';
-    document.title = ad + ' · Sipariş ver';
+  var gitti = false;
+  function git(u){ if (gitti) return; gitti = true; location.replace(u); }
+  function tgUrl(r){ return r && r.bot && !r.telegramsiz ? 'https://t.me/' + encodeURIComponent(r.bot) + '?start=qr' : ''; }
+  // seçim ekranı: ?sor=1 ya da web siparişi kapalı
+  function secim(r){
+    var ad = r.ad || '', tu = tgUrl(r);
+    document.title = (ad || 'YourPOS 360') + ' · YourPOS 360';
     $('#logo').innerHTML = r.logoResim ? '<img src="' + esc(r.logoResim) + '" alt="">' : esc(r.logo || (ad.trim().split(/\s+/).slice(0, 2).map(function(w){ return w.charAt(0); }).join('').toLocaleUpperCase('tr-TR') || '🍽️'));
     $('#ad').textContent = ad;
     var h = '';
-    if (tgUrl && !r.telegramsiz) h += '<a class="tg" href="' + esc(tgUrl) + '" data-sec="tg"><span class="ik">✈️</span><span><b>Telegram\'dan sipariş ver</b><span class="s">Telegram uygulaması açılır</span></span><span class="ok">›</span></a>';
-    if (r.web !== false) h += '<a class="web" href="' + esc(webUrl) + '" data-sec="web"><span class="ik">🌐</span><span><b>Tarayıcıdan sipariş ver</b><span class="s">Uygulama gerekmez, bu telefonda açılır</span></span><span class="ok">›</span></a>';
-    $('#sec').innerHTML = h || '<p class="alt">Bu işletme şu an sipariş almıyor.</p>';
+    if (tu) h += '<a class="tg" href="' + esc(tu) + '" data-sec="tg"><span class="ik">✈️</span><span><b>' + esc(t('tg')) + '</b><span class="s">' + esc(t('tgS')) + '</span></span><span class="ok">›</span></a>';
+    if (r.web !== false) h += '<a class="web" href="' + esc(webUrl) + '" data-sec="web"><span class="ik">🌐</span><span><b>' + esc(t('web')) + '</b><span class="s">' + esc(t('webS')) + '</span></span><span class="ok">›</span></a>';
+    $('#sec').innerHTML = h || '<p class="alt">' + esc(t('almiyor')) + '</p>';
     $('#yuk').hidden = true;
-    $('#altyazi').textContent = r.acik === false ? 'Şu an kapalı · menüye göz atabilirsiniz' : 'Nasıl sipariş vermek istersiniz?';
-    if (r.telegramsiz && r.web !== false) {
-      $('#not').hidden = false;
-      $('#not').textContent = 'Telegram şu an kullanılamıyor; siparişinizi tarayıcıdan verebilirsiniz. Sipariş sayfası açılıyor…';
-      setTimeout(function(){ location.replace(webUrl); }, 1800);
-      return;
-    }
-    $('#hatirlaK').hidden = !(tgUrl && r.web !== false);
-    var son = LS.get(KEY);
-    if (son && /^(tg|web)$/.test(son) && new URLSearchParams(location.search).get('sor') !== '1') {
-      var a = document.querySelector('[data-sec="' + son + '"]');
-      if (a) { $('#hatirla').checked = true; location.replace(a.href); }
-    }
+    $('#altyazi').textContent = r.acik === false ? t('kapali') : t('nasil');
+    $('#hatirlaK').hidden = !(tu && r.web !== false);
   }
   document.addEventListener('click', function(e){
     var a = e.target.closest && e.target.closest('[data-sec]');
-    if (a && $('#hatirla').checked) LS.set(KEY, a.getAttribute('data-sec'));
-    if (a && !$('#hatirla').checked) LS.set(KEY, '');
+    if (a) LS.set(KEY, $('#hatirla').checked ? a.getAttribute('data-sec') : '');
   });
-  if (demo) { goster({ ad:'Örnek Dönerci', bot:'yourpos360_bot', web:true, acik:true }); return; }
-  // Sunucu uykudaysa ilk yanıt gecikebilir: 6 sn sonra tarayıcı seçeneği yine de gösterilir
-  var bitti = false;
-  var t = setTimeout(function(){ if (!bitti) { $('#sec').innerHTML = '<a class="web" href="' + esc(webUrl) + '" data-sec="web"><span class="ik">🌐</span><span><b>Tarayıcıdan sipariş ver</b><span class="s">Uygulama gerekmez</span></span><span class="ok">›</span></a>'; $('#altyazi').textContent = 'Bağlanıyor… Beklemeden tarayıcıdan sipariş verebilirsiniz.'; } }, 6000);
+  function karar(r){
+    if (sor || r.web === false) { secim(r); return; }
+    if (LS.get(KEY) === 'tg' && tgUrl(r)) { git(tgUrl(r)); return; }   // müşterinin daha önceki seçimi
+    git(webUrl);
+  }
+  if (demo) { karar({ ad:'Örnek Dönerci', bot:'yourpos360_bot', web:true, acik:true }); return; }
+  // Sunucu geç kalırsa beklemeden sipariş sayfası açılır (sayfa kendi bağlantısını dener)
+  var zaman = setTimeout(function(){ if (!sor) git(webUrl); }, LS.get(KEY) === 'tg' ? 4000 : 2500);
   fetch(API + '?api=1', { method:'POST', body:JSON.stringify({ act:'webIsletme', b:b }) }).then(function(r){ return r.json(); }).then(function(r){
-    bitti = true; clearTimeout(t);
-    if (!r || !r.ok) { $('#yuk').hidden = true; $('#ad').textContent = 'İşletme bulunamadı'; $('#altyazi').textContent = 'QR kodu eski ya da işletme kaldırılmış olabilir.'; $('#sec').innerHTML = ''; return; }
-    goster(r);
-  }).catch(function(){
-    bitti = true; clearTimeout(t);
-    $('#yuk').hidden = true;
-    $('#altyazi').textContent = 'Sunucuya ulaşılamadı. Tarayıcıdan sipariş sayfasını açmayı deneyin.';
-    $('#sec').innerHTML = '<a class="web" href="' + esc(webUrl) + '" data-sec="web"><span class="ik">🌐</span><span><b>Tarayıcıdan sipariş ver</b><span class="s">Sipariş sayfasını aç</span></span><span class="ok">›</span></a>';
-  });
+    if (gitti) return;
+    clearTimeout(zaman);
+    if (!r || !r.ok) { $('#yuk').hidden = true; $('#ad').textContent = t('yok'); $('#altyazi').textContent = t('eski'); $('#sec').innerHTML = ''; return; }
+    karar(r);
+  }).catch(function(){ if (!gitti) { clearTimeout(zaman); if (sor) secim({ web:true }); else git(webUrl); } });
 })();
 </script>
 </body>
