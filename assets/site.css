@@ -334,3 +334,6 @@ h2{font-size:clamp(30px,3.8vw,46px);line-height:1.1;letter-spacing:-.03em;font-w
   .ust .btn-giris{display:none}
 }
 @media (min-width:861px) and (max-width:1100px){ .ust .btn-giris + .btn-ac{margin-left:auto} .ust .hamb{margin-left:10px} }
+
+/* Current product UI gallery: preserve complete screenshots, never crop role controls. */
+.current-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;align-items:start}.current-shot{margin:0;background:#fff;border-radius:20px;padding:18px;min-width:0;box-shadow:var(--golge)}.current-shot a{display:block;background:#0e1620;border-radius:12px;overflow:hidden}.current-shot img{display:block;width:100%;height:auto}.phone-shot a{max-width:300px;margin:auto}.current-shot h3{margin:16px 0 6px}.current-shot p{color:var(--sub)}.vitrin:not(:has(.v-tel)){grid-template-columns:1fr;max-width:850px;margin-left:auto;margin-right:auto}@media(max-width:640px){.current-gallery{grid-template-columns:1fr}.current-shot{padding:14px}}
