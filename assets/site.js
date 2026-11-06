@@ -9,7 +9,7 @@
     var a = document.body.classList.toggle('menu-acik');
     hamb.setAttribute('aria-expanded', a ? 'true' : 'false');
   });
-  document.querySelectorAll('.menu a').forEach(function (a) { a.addEventListener('click', function () { document.body.classList.remove('menu-acik'); }); });
+  document.querySelectorAll('.menu a').forEach(function (a) { a.addEventListener('click', function () { document.body.classList.remove('menu-acik'); if (hamb) hamb.setAttribute('aria-expanded', 'false'); }); });
 
   // kaydırınca görünme
   var gor = document.querySelectorAll('.gor');
